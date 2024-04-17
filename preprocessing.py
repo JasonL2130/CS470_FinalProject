@@ -12,9 +12,11 @@ def one_hot_encode(df, cols):
     return encoded_df
 
 # Label Encode Categorical Features
-def label_encode(df, cols, range):
+def label_encode(df, cols):
+    label_encoder = LabelEncoder()
+    df[cols] = df[cols].apply(label_encoder.fit_transform)
 
-    return None
+    return df
 
 # Converting Target Features to Categorical
 def convert_ranges(df, features):
@@ -28,14 +30,23 @@ def convert_ranges(df, features):
                                     labels = associated_labels)
     return df
 
-# Min-Max Scaling
-def scale(df):
+# Moving Label Features to End of DF
+def label_end(df, cols):
+    for feature in cols:
+        label_col = df.pop(feature)
+        df[feature] = label_col
+
+    return df
+
+# Min-Max Scaling --> Only for Training Data
+def scale(df, cols):
+    scaler = MinMaxScaler()
 
     return None
 
 # Pearson Correlation Matrix
 def pearson_matrix(df):
-
-    return None
+    corrDF = df.corr(method='pearson')
+    return corrDF
 
 
