@@ -39,7 +39,7 @@ def label_end(df, cols):
     return df
 
 # Min-Max Scaling --> Only for Training Data
-def scale(df, cols):
+def min_max_scale(df, cols):
     scaler = MinMaxScaler()
 
     return None
