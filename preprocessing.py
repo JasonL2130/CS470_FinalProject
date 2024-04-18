@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.model_selection import train_test_split
 
 # Drop Irrelevant Features - [‘Permissions’, ‘Music effects’, ‘Timestamp’]
 def drop_irreleveant(df, cols):
@@ -42,10 +43,19 @@ def label_end(df, cols):
     return df
 
 # Min-Max Scaling --> Only for Training Data
-def min_max_scale(df, cols):
+def min_max_scale(train_df, test_df, cols):
     scaler = MinMaxScaler()
+    scaler.fit(train_df[cols]) 
+    
+    train_df[cols] = scaler.transform(train_df[cols]) 
+    test_df[cols] = scaler.transform(test_df[cols]) 
 
-    return None
+    return train_df, test_df
+
+# Train-Test Split of Data
+def data_split(df):
+    train, test = train_test_split(df, test_size=0.2, random_state=42)
+    return train, test
 
 # Pearson Correlation Matrix
 def pearson_matrix(df):
