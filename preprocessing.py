@@ -14,9 +14,9 @@ def one_hot_encode(df, cols):
 
 # Label Encode Categorical Features
 def label_encode(df, cols, options):
+    label_encoder = LabelEncoder()
+    label_encoder.fit(options)
     for feature in cols:
-        label_encoder = LabelEncoder()
-        label_encoder.fit(options)
         df[feature] = label_encoder.transform(df[feature])
 
     return df
@@ -24,7 +24,7 @@ def label_encode(df, cols, options):
 # Converting Target Features to Categorical
 def convert_ranges(df, features):
     range_vals = [float('-inf'), 1.0, 4.0, 7.0, 10.0]
-    associated_labels = ["Symptoms_None", "Symptoms_Mild", "Symptoms_Moderate", "Symptoms_Severe"]
+    associated_labels = ["Symptoms_Asymptomatic", "Symptoms_Mild", "Symptoms_Moderate", "Symptoms_Severe"]
 
     for feature in features:
         df[feature] = pd.cut(df[feature],
@@ -68,7 +68,6 @@ def pearson_drop_delta(orig_df, corr_df, delta):
         return delta_list
 
     delta_list = delta_search(corr_df, delta) 
-    print(delta_list)
     final_drop_list = list(set(delta_list)) 
     print(final_drop_list)
     final_DF = orig_df.drop(final_drop_list, axis=1)
@@ -90,12 +89,10 @@ def pearson_drop_gamma(orig_df, corr_df, gamma):
         return gamma_list
 
     gamma_list = gamma_search(corr_df, gamma) 
-    print(gamma_list)
     final_drop_list = list(set(gamma_list)) 
     print(final_drop_list)
-    # final_DF = orig_df.drop(final_drop_list, axis=1)
-
-    return None #final_DF
+    
+    return final_drop_list 
 
 # Update Sample Name --> Remove 'Symptoms_'
 def remove_prefix(df, col_name):
