@@ -6,7 +6,7 @@ import numpy as np
 
 
 ############################# OCD MODEL AND RESULTS GO HERE ##############################
-def run_OCD_model(OCD_train, OCD_test):
+def run_OCD_dt_model(OCD_train, OCD_test):
 
     OCD_xTrain = OCD_train[:, :-1]
     OCD_yTrain = OCD_train[:, -1]
@@ -27,13 +27,8 @@ def run_OCD_model(OCD_train, OCD_test):
     return accuracy_score(OCD_yTest, OCD_yPred)
 
 
-
-
-######################################################
-
-
 ############################### INSOMNIA MODEL AND RESULTS GO HERE ########################
-def run_insomnia_model(insomnia_train, insomnia_test):
+def run_insomnia_dt_model(insomnia_train, insomnia_test):
 
     insomnia_xTrain = insomnia_train[:, :-1]
     insomnia_yTrain = insomnia_train[:, -1]
@@ -52,11 +47,9 @@ def run_insomnia_model(insomnia_train, insomnia_test):
 
     return accuracy_score(insomnia_yTest, insomnia_yPred)
 
-##############################################################
-
 
 ################################ ANXIETY MODEL AND RESULTS GO HERE #############################
-def run_anxiety_model(anxiety_train, anxiety_test):
+def run_anxiety_dt_model(anxiety_train, anxiety_test):
 
     # anxiety_data = pd.read_csv("anxiety_data_name_")
 
@@ -77,11 +70,8 @@ def run_anxiety_model(anxiety_train, anxiety_test):
 
     return accuracy_score(anxiety_yTest, anxiety_yPred)
 
-##############################################################
-
-
 ################################## DEPRESSION MODEL AND RESULTS GO HERE ###############################
-def run_depression_model(depression_train, depression_test):
+def run_depression_dt_model(depression_train, depression_test):
 
     # depression_data = pd.read_csv("axitety_data_name_")
 

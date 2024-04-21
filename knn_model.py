@@ -7,7 +7,7 @@ import numpy as np
 
 
 ############################# OCD MODEL AND RESULTS GO HERE ##############################
-def run_OCD_model(OCD_train, OCD_test, k, w):
+def run_OCD_knn_model(OCD_train, OCD_test, k, w):
 
     OCD_xTrain = OCD_train[:, :-1]
     OCD_yTrain = OCD_train[:, -1]
@@ -29,12 +29,8 @@ def run_OCD_model(OCD_train, OCD_test, k, w):
 
 
 
-
-######################################################
-
-
 ############################### INSOMNIA MODEL AND RESULTS GO HERE ########################
-def run_insomnia_model(insomnia_train, insomnia_test, k, w):
+def run_insomnia_knn_model(insomnia_train, insomnia_test, k, w):
 
     insomnia_xTrain = insomnia_train[:, :-1]
     insomnia_yTrain = insomnia_train[:, -1]
@@ -53,11 +49,9 @@ def run_insomnia_model(insomnia_train, insomnia_test, k, w):
 
     return accuracy_score(insomnia_yTest, insomnia_yPred)
 
-##############################################################
-
 
 ################################ ANXIETY MODEL AND RESULTS GO HERE #############################
-def run_anxiety_model(anxiety_train, anxiety_test, k, w):
+def run_anxiety_knn_model(anxiety_train, anxiety_test, k, w):
 
     # anxiety_data = pd.read_csv("anxiety_data_name_")
 
@@ -78,11 +72,9 @@ def run_anxiety_model(anxiety_train, anxiety_test, k, w):
 
     return accuracy_score(anxiety_yTest, anxiety_yPred)
 
-##############################################################
-
 
 ################################## DEPRESSION MODEL AND RESULTS GO HERE ###############################
-def run_depression_model(depression_train, depression_test, k, w):
+def run_depression_knn_model(depression_train, depression_test, k, w):
 
     # depression_data = pd.read_csv("axitety_data_name_")
 
@@ -103,8 +95,6 @@ def run_depression_model(depression_train, depression_test, k, w):
 
     return accuracy_score(depression_yTest, depression_yPred)
 
-#######################################################
-
 
 #################################### FINDING OPTIMAL NUMBER OF NEIGHBORS IS DONE HERE ###################################
 
@@ -116,13 +106,13 @@ def optimal_k_value(OCD_train, OCD_test, insomnia_train, insomnia_test, anxiety_
     anxiety_accuracy_score_list = []
     depression_accuracy_score_list = []
     for k in range(1,100):
-        OCD_accuracy_score = run_OCD_model(OCD_train, OCD_test, k)
+        OCD_accuracy_score = run_OCD_knn_model(OCD_train, OCD_test, k)
         OCD_accuracy_score_list.append(OCD_accuracy_score)
-        insomnia_accuracy_score = run_insomnia_model(insomnia_train, insomnia_test, k)
+        insomnia_accuracy_score = run_insomnia_knn_model(insomnia_train, insomnia_test, k)
         insomnia_accuracy_score_list.append(insomnia_accuracy_score)
-        anxiety_accuracy_score = run_anxiety_model(anxiety_train, anxiety_test, k)
+        anxiety_accuracy_score = run_anxiety_knn_model(anxiety_train, anxiety_test, k)
         anxiety_accuracy_score_list.append(anxiety_accuracy_score)
-        depression_accuracy_score = run_depression_model(depression_train, depression_test, k)
+        depression_accuracy_score = run_depression_knn_model(depression_train, depression_test, k)
         depression_accuracy_score_list.append(depression_accuracy_score)
 
         accuracy_score_list.append(np.mean([OCD_accuracy_score, insomnia_accuracy_score, anxiety_accuracy_score, depression_accuracy_score]))
@@ -209,7 +199,7 @@ def main():
     OCD_xTest = OCD_test[:, :-1]
     OCD_yTest = OCD_test[:, -1]
 
-    run_OCD_model(OCD_train, OCD_test, 38, 'uniform') # based on best parameters from gridsearch for all these models
+    run_OCD_knn_model(OCD_train, OCD_test, 38, 'uniform') # based on best parameters from gridsearch for all these models
 
     insomnia_train = np.array(pd.read_csv("insomnia_train_final.csv"))
     insomnia_test = np.array(pd.read_csv("insomnia_test_final.csv"))
@@ -219,7 +209,7 @@ def main():
     insomnia_xTest = insomnia_test[:, :-1]
     insomnia_yTest = insomnia_test[:, -1]
 
-    run_insomnia_model(insomnia_train, insomnia_test, 141, 'distance')
+    run_insomnia_knn_model(insomnia_train, insomnia_test, 141, 'distance')
 
 
     anxiety_train = np.array(pd.read_csv("anxiety_train_final.csv"))
@@ -230,7 +220,7 @@ def main():
     anxiety_xTest = anxiety_test[:, :-1]
     anxiety_yTest = anxiety_test[:, -1]
 
-    run_anxiety_model(anxiety_train, anxiety_test, 30, 'uniform')
+    run_anxiety_knn_model(anxiety_train, anxiety_test, 30, 'uniform')
 
     depression_train = np.array(pd.read_csv("depression_train_final.csv"))
     depression_test = np.array(pd.read_csv("depression_test_final.csv"))
@@ -240,7 +230,7 @@ def main():
     depression_xTest = depression_test[:, :-1]
     depression_yTest = depression_test[:, -1]
 
-    run_depression_model(depression_train, depression_test, 70, 'uniform')
+    run_depression_knn_model(depression_train, depression_test, 70, 'uniform')
 
     # optimal_k_value(OCD_train, OCD_test, insomnia_train, insomnia_test, anxiety_train, anxiety_test, depression_train, depression_test)
 
