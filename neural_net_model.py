@@ -1,8 +1,11 @@
 import pandas as pd
-from sklearn.model_selection import KFold, GridSearchCV
+from sklearn.model_selection import KFold, GridSearchCV, RandomizedSearchCV
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
+from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error, roc_auc_score
 import numpy as np
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 ############################# OCD MODEL AND RESULTS GO HERE ##############################
@@ -13,7 +16,7 @@ def run_OCD_model(OCD_train, OCD_test):
     OCD_xTest = OCD_test[:, :-1]
     OCD_yTest = OCD_test[:, -1]
 
-    OCD_nn = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=500, random_state=42)
+    OCD_nn = MLPClassifier(solver="sgd", learning_rate="adaptive", hidden_layer_sizes=(25, 25, 25), alpha=0.0001, activation="relu", max_iter=500, random_state=42, early_stopping=True)
 
     OCD_nn.fit(OCD_xTrain, OCD_yTrain)
     OCD_yPred = OCD_nn.predict(OCD_xTest)
@@ -40,7 +43,7 @@ def run_insomnia_model(insomnia_train, insomnia_test):
     insomnia_xTest = insomnia_test[:, :-1]
     insomnia_yTest = insomnia_test[:, -1]
 
-    insomnia_nn = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=500, random_state=42)
+    insomnia_nn = MLPClassifier(solver="sgd", learning_rate="constant", hidden_layer_sizes=(50, 50), alpha=0.0001, activation="tanh", max_iter=500, random_state=42, early_stopping=True)
 
     insomnia_nn.fit(insomnia_xTrain, insomnia_yTrain)
     insomnia_yPred = insomnia_nn.predict(insomnia_xTest)
@@ -65,7 +68,7 @@ def run_anxiety_model(anxiety_train, anxiety_test):
     anxiety_xTest = anxiety_test[:, :-1]
     anxiety_yTest = anxiety_test[:, -1]
 
-    anxiety_nn = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=500, random_state=42)
+    anxiety_nn = MLPClassifier(solver="sgd", learning_rate="constant", hidden_layer_sizes=(50, 50), alpha=0.0001, activation="relu", max_iter=500, random_state=42, early_stopping=True)
 
     anxiety_nn.fit(anxiety_xTrain, anxiety_yTrain)
     anxiety_yPred = anxiety_nn.predict(anxiety_xTest)
@@ -90,7 +93,7 @@ def run_depression_model(depression_train, depression_test):
     depression_xTest = depression_test[:, :-1]
     depression_yTest = depression_test[:, -1]
 
-    depression_nn = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=500, random_state=42)
+    depression_nn = MLPClassifier(solver="adam", learning_rate="constant", hidden_layer_sizes=(50, 50), alpha=0.001, activation="relu", max_iter=500, random_state=42, early_stopping=True)
 
     depression_nn.fit(depression_xTrain, depression_yTrain)
     depression_yPred = depression_nn.predict(depression_xTest)
@@ -105,23 +108,23 @@ def run_depression_model(depression_train, depression_test):
 #######################################################
 
 def gridSearch(OCD_xTrain, OCD_yTrain, insomnia_xTrain, insomnia_yTrain, anxiety_xTrain, anxiety_yTrain, depression_xTrain, depression_yTrain):
-    param_grid = {
-    'criterion': ['gini', 'entropy'],
-    'max_depth': [None, 10, 20, 30, 40, 50],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
-    'max_features': ['auto', 'sqrt', 'log2']
-    }
+    param_dist = {
+    'hidden_layer_sizes': [(100,), (50, 50), (25, 25, 25)],
+    'activation': ['relu', 'tanh'],
+    'solver': ['adam', 'sgd'],
+    'alpha': [0.0001, 0.001, 0.01],
+    'learning_rate': ['constant', 'adaptive'],
+}
 
     OCD_nn = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=500, random_state=42)
     insomnia_nn = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=500, random_state=42)
     anxiety_nn = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=500, random_state=42)
     depression_nn = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=500, random_state=42)
 
-    grid_search_OCD = GridSearchCV(OCD_nn, param_grid, cv=5, n_jobs=-1)
-    grid_search_insomnia = GridSearchCV(insomnia_nn, param_grid, cv=5, n_jobs=-1)
-    grid_search_anxiety = GridSearchCV(anxiety_nn, param_grid, cv=5, n_jobs=-1)
-    grid_search_depression = GridSearchCV(depression_nn, param_grid, cv=5, n_jobs=-1)
+    grid_search_OCD = RandomizedSearchCV(estimator=OCD_nn, param_distributions=param_dist, n_iter=10, cv=5, n_jobs=-1)
+    grid_search_insomnia = RandomizedSearchCV(estimator=insomnia_nn, param_distributions=param_dist, n_iter=10, cv=5, n_jobs=-1)
+    grid_search_anxiety = RandomizedSearchCV(estimator=anxiety_nn, param_distributions=param_dist, n_iter=10, cv=5, n_jobs=-1)
+    grid_search_depression = RandomizedSearchCV(estimator=depression_nn, param_distributions=param_dist, n_iter=10, cv=5, n_jobs=-1)
 
     grid_search_OCD.fit(OCD_xTrain, OCD_yTrain)
     grid_search_insomnia.fit(insomnia_xTrain, insomnia_yTrain)
@@ -129,19 +132,19 @@ def gridSearch(OCD_xTrain, OCD_yTrain, insomnia_xTrain, insomnia_yTrain, anxiety
     grid_search_depression.fit(depression_xTrain, depression_yTrain)
 
 
-    # print("Best OCD parameters:", grid_search_OCD.best_params_)
+    print("Best OCD parameters:", grid_search_OCD.best_params_)
     # print("Best OCD estimator: ", grid_search_OCD.best_estimator_)
     print("Best OCD score:", grid_search_OCD.best_score_)
 
-    # print("Best insomnia parameters:", grid_search_insomnia.best_params_)
+    print("Best insomnia parameters:", grid_search_insomnia.best_params_)
     # print("Best insomnia estimator: ", grid_search_insomnia.best_estimator_)
     print("Best insomnia score:", grid_search_insomnia.best_score_)
 
-    # print("Best anxiety parameters:", grid_search_anxiety.best_params_)
+    print("Best anxiety parameters:", grid_search_anxiety.best_params_)
     # print("Best anxiety estimator: ", grid_search_anxiety.best_estimator_)
     print("Best anxiety score:", grid_search_anxiety.best_score_)
 
-    # print("Best depression parameters:", grid_search_depression.best_params_)
+    print("Best depression parameters:", grid_search_depression.best_params_)
     # print("Best depression estimator: ", grid_search_depression.best_estimator_)
     print("Best depression score:", grid_search_depression.best_score_)
 
@@ -157,6 +160,11 @@ def main():
 
     run_OCD_model(OCD_train, OCD_test)
 
+    # accuracy score for OCD:  0.3724137931034483
+    # precision score for OCD:  0.34326431163371735
+    # recall score for OCD:  0.3724137931034483
+    # mean squared error for OCD:  1.7241379310344827
+
     insomnia_train = np.array(pd.read_csv("insomnia_train_final.csv"))
     insomnia_test = np.array(pd.read_csv("insomnia_test_final.csv"))
 
@@ -166,6 +174,11 @@ def main():
     insomnia_yTest = insomnia_test[:, -1]
 
     run_insomnia_model(insomnia_train, insomnia_test)
+
+    # accuracy score for insomnia:  0.2896551724137931
+    # precision score for insomnia:  0.2883202319812738
+    # recall score for insomnia:  0.2896551724137931
+    # mean squared error for insomnia:  2.503448275862069
 
 
     anxiety_train = np.array(pd.read_csv("anxiety_train_final.csv"))
@@ -178,6 +191,11 @@ def main():
 
     run_anxiety_model(anxiety_train, anxiety_test)
 
+    # accuracy score for anxiety:  0.3103448275862069
+    # precision score for anxiety:  0.2978311663840211
+    # recall score for anxiety:  0.3103448275862069
+    # mean squared error for anxiety:  1.8482758620689654
+
     depression_train = np.array(pd.read_csv("depression_train_final.csv"))
     depression_test = np.array(pd.read_csv("depression_test_final.csv"))
 
@@ -188,7 +206,26 @@ def main():
 
     run_depression_model(depression_train, depression_test)
 
+    # accuracy score for depression:  0.32413793103448274
+    # precision score for depression:  0.3345493919706813
+    # recall score for depression:  0.3103448275862069
+    # mean squared error for depression:  1.6758620689655173
+
     # gridSearch(OCD_xTrain, OCD_yTrain, insomnia_xTrain, insomnia_yTrain, anxiety_xTrain, anxiety_yTrain, depression_xTrain, depression_yTrain)
+
+    models = ['KNN', 'Decision Tree', 'Random Forest', 'Neural Network', 'Random Guess']
+
+    # List of accuracy scores for each model
+    accuracy_scores = [0.296551724137931, 0.3568965517241379, 0.31724137931034485, 0.32413793103448274, 0.25]
+
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=models, y=accuracy_scores, palette='viridis')
+    plt.ylim(0.0, 0.7)  # Set the y-axis limits to better visualize differences
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy of Classification Models Predicting Depression Severity')
+    plt.show()
+
+
 
 if __name__ == "__main__":
     main()
