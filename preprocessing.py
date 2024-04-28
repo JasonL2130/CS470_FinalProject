@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.model_selection import train_test_split
+from imblearn.over_sampling import SMOTE
 
 # Drop Irrelevant Features - [‘Permissions’, ‘Music effects’, ‘Timestamp’]
 def drop_irreleveant(df, cols):
@@ -26,6 +27,17 @@ def label_encode(df, cols, options):
 def convert_ranges(df, features):
     range_vals = [float('-inf'), 1.0, 4.0, 7.0, 10.0]
     associated_labels = ["Symptoms_Asymptomatic", "Symptoms_Mild", "Symptoms_Moderate", "Symptoms_Severe"]
+
+    for feature in features:
+        df[feature] = pd.cut(df[feature],
+                                    bins = range_vals,
+                                    right = True,
+                                    labels = associated_labels)
+    return df
+
+def convert_ranges_binary(df, features):
+    range_vals = [float('-inf'), 4.9, 10.0]
+    associated_labels = ["Symptoms_No", "Symptoms_Yes"]
 
     for feature in features:
         df[feature] = pd.cut(df[feature],
@@ -109,3 +121,9 @@ def remove_prefix(df, col_name):
     df[col_name] = df[col_name].str.replace('Symptoms_', '')
     return df
 
+############################ DEALING W/ CLASS IMBALANCE ############################
+
+def smote(xFeat, y):
+    smote_model = SMOTE(sampling_strategy='auto')
+    x_train_smote, y_train_smote = smote_model.fit_resample(xFeat, y)
+    return x_train_smote, y_train_smote
