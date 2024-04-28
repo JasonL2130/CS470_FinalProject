@@ -1,19 +1,23 @@
 import pandas as pd
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
+from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error, roc_curve, roc_auc_score
 import numpy as np
 
 
 ############################# OCD MODEL AND RESULTS GO HERE ##############################
-def run_OCD_model(OCD_train, OCD_test):
+def run_OCD_model(OCD_xTrain, OCD_xTest, OCD_yTrain, OCD_yTest):
 
-    OCD_xTrain = OCD_train[:, :-1]
-    OCD_yTrain = OCD_train[:, -1]
-    OCD_xTest = OCD_test[:, :-1]
-    OCD_yTest = OCD_test[:, -1]
+    # OCD_xTrain = OCD_train[:, :-1]
+    # OCD_yTrain = OCD_train[:, -1]
+    # OCD_xTest = OCD_test[:, :-1]
+    # OCD_yTest = OCD_test[:, -1]
+    OCD_xTrain = OCD_xTrain
+    OCD_xTest = OCD_xTest
+    OCD_yTrain = OCD_yTrain
+    OCD_yTest = OCD_yTest
 
-    OCD_dt = DecisionTreeClassifier(criterion='gini')
+    OCD_dt = DecisionTreeClassifier(criterion='gini', max_depth=50, max_features="log2", min_samples_leaf=1, min_samples_split=2)
 
     OCD_dt.fit(OCD_xTrain, OCD_yTrain)
     OCD_yPred = OCD_dt.predict(OCD_xTest)
@@ -24,7 +28,7 @@ def run_OCD_model(OCD_train, OCD_test):
     print("mean squared error for OCD: ", mean_squared_error(OCD_yTest, OCD_yPred))
     
 
-    return accuracy_score(OCD_yTest, OCD_yPred)
+    return OCD_yPred, accuracy_score(OCD_yTest, OCD_yPred)
 
 
 
@@ -33,14 +37,19 @@ def run_OCD_model(OCD_train, OCD_test):
 
 
 ############################### INSOMNIA MODEL AND RESULTS GO HERE ########################
-def run_insomnia_model(insomnia_train, insomnia_test):
+def run_insomnia_model(insomnia_xTrain, insomnia_xTest, insomnia_yTrain, insomnia_yTest):
 
-    insomnia_xTrain = insomnia_train[:, :-1]
-    insomnia_yTrain = insomnia_train[:, -1]
-    insomnia_xTest = insomnia_test[:, :-1]
-    insomnia_yTest = insomnia_test[:, -1]
+    # insomnia_xTrain = insomnia_train[:, :-1]
+    # insomnia_yTrain = insomnia_train[:, -1]
+    # insomnia_xTest = insomnia_test[:, :-1]
+    # insomnia_yTest = insomnia_test[:, -1]
 
-    insomnia_dt = DecisionTreeClassifier()
+    insomnia_xTrain = insomnia_xTrain
+    insomnia_xTest = insomnia_xTest
+    insomnia_yTrain = insomnia_yTrain
+    insomnia_yTest = insomnia_yTest
+
+    insomnia_dt = DecisionTreeClassifier(criterion="entropy", max_depth=20, max_features="sqrt", min_samples_leaf=2, min_samples_split=5)
 
     insomnia_dt.fit(insomnia_xTrain, insomnia_yTrain)
     insomnia_yPred = insomnia_dt.predict(insomnia_xTest)
@@ -56,16 +65,21 @@ def run_insomnia_model(insomnia_train, insomnia_test):
 
 
 ################################ ANXIETY MODEL AND RESULTS GO HERE #############################
-def run_anxiety_model(anxiety_train, anxiety_test):
+def run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTest):
 
     # anxiety_data = pd.read_csv("anxiety_data_name_")
 
-    anxiety_xTrain = anxiety_train[:, :-1]
-    anxiety_yTrain = anxiety_train[:, -1]
-    anxiety_xTest = anxiety_test[:, :-1]
-    anxiety_yTest = anxiety_test[:, -1]
+    # anxiety_xTrain = anxiety_train[:, :-1]
+    # anxiety_yTrain = anxiety_train[:, -1]
+    # anxiety_xTest = anxiety_test[:, :-1]
+    # anxiety_yTest = anxiety_test[:, -1]
 
-    anxiety_dt = DecisionTreeClassifier()
+    anxiety_xTrain = anxiety_xTrain
+    anxiety_yTrain = anxiety_yTrain
+    anxiety_xTest = anxiety_xTest
+    anxiety_yTest = anxiety_yTest
+
+    anxiety_dt = DecisionTreeClassifier(criterion="entropy", max_depth=40, max_features="log2", min_samples_leaf=1, min_samples_split=2)
 
     anxiety_dt.fit(anxiety_xTrain, anxiety_yTrain)
     anxiety_yPred = anxiety_dt.predict(anxiety_xTest)
@@ -81,16 +95,21 @@ def run_anxiety_model(anxiety_train, anxiety_test):
 
 
 ################################## DEPRESSION MODEL AND RESULTS GO HERE ###############################
-def run_depression_model(depression_train, depression_test):
+def run_depression_model(depression_xTrain, depression_xTest, depression_yTrain, depression_yTest):
 
     # depression_data = pd.read_csv("axitety_data_name_")
 
-    depression_xTrain = depression_train[:, :-1]
-    depression_yTrain = depression_train[:, -1]
-    depression_xTest = depression_test[:, :-1]
-    depression_yTest = depression_test[:, -1]
+    # depression_xTrain = depression_train[:, :-1]
+    # depression_yTrain = depression_train[:, -1]
+    # depression_xTest = depression_test[:, :-1]
+    # depression_yTest = depression_test[:, -1]
 
-    depression_dt = DecisionTreeClassifier()
+    depression_xTrain = depression_xTrain
+    depression_xTest = depression_xTest
+    depression_yTrain = depression_yTrain
+    depression_yTest = depression_yTest
+
+    depression_dt = DecisionTreeClassifier(criterion="entropy", max_depth=40, max_features="sqrt", min_samples_leaf=1, min_samples_split=2)
 
     depression_dt.fit(depression_xTrain, depression_yTrain)
     depression_yPred = depression_dt.predict(depression_xTest)
@@ -110,7 +129,7 @@ def gridSearch(OCD_xTrain, OCD_yTrain, insomnia_xTrain, insomnia_yTrain, anxiety
     'max_depth': [None, 10, 20, 30, 40, 50],
     'min_samples_split': [2, 5, 10],
     'min_samples_leaf': [1, 2, 4],
-    'max_features': ['auto', 'sqrt', 'log2']
+    'max_features': ['sqrt', 'log2']
     }
 
     OCD_dt = DecisionTreeClassifier()
@@ -129,19 +148,19 @@ def gridSearch(OCD_xTrain, OCD_yTrain, insomnia_xTrain, insomnia_yTrain, anxiety
     grid_search_depression.fit(depression_xTrain, depression_yTrain)
 
 
-    # print("Best OCD parameters:", grid_search_OCD.best_params_)
+    print("Best OCD parameters:", grid_search_OCD.best_params_)
     # print("Best OCD estimator: ", grid_search_OCD.best_estimator_)
     print("Best OCD score:", grid_search_OCD.best_score_)
 
-    # print("Best insomnia parameters:", grid_search_insomnia.best_params_)
+    print("Best insomnia parameters:", grid_search_insomnia.best_params_)
     # print("Best insomnia estimator: ", grid_search_insomnia.best_estimator_)
     print("Best insomnia score:", grid_search_insomnia.best_score_)
 
-    # print("Best anxiety parameters:", grid_search_anxiety.best_params_)
+    print("Best anxiety parameters:", grid_search_anxiety.best_params_)
     # print("Best anxiety estimator: ", grid_search_anxiety.best_estimator_)
     print("Best anxiety score:", grid_search_anxiety.best_score_)
 
-    # print("Best depression parameters:", grid_search_depression.best_params_)
+    print("Best depression parameters:", grid_search_depression.best_params_)
     # print("Best depression estimator: ", grid_search_depression.best_estimator_)
     print("Best depression score:", grid_search_depression.best_score_)
 
@@ -155,7 +174,21 @@ def main():
     OCD_xTest = OCD_test[:, :-1]
     OCD_yTest = OCD_test[:, -1]
 
-    # run_OCD_model(OCD_train, OCD_test)
+    OCD_xTrain = np.array(pd.read_csv("binary_ocd_train_xFeat.csv"))
+    OCD_yTrain = np.array(pd.read_csv("binary_ocd_train_y.csv"))
+    OCD_xTest = np.array(pd.read_csv("binary_ocd_test_xFeat.csv"))
+    OCD_yTest = np.array(pd.read_csv("binary_ocd_test_y.csv"))
+
+    OCD_yPred, _ = run_OCD_model(OCD_xTrain, OCD_xTest, OCD_yTrain, OCD_yTest)
+
+    OCD_fpr, OCD_tpr, _ = roc_curve(OCD_yTest, OCD_yPred)
+    OCD_roc_auc = roc_auc_score(OCD_yTest, OCD_yPred)
+
+    print("ocd roc: ", OCD_roc_auc)
+    df = pd.DataFrame({'FPR': OCD_fpr, 'TPR': OCD_tpr})
+
+    # Write the DataFrame to a CSV file
+    df.to_csv('dt_OCD_graph_data.csv', index=False)
 
     insomnia_train = np.array(pd.read_csv("insomnia_train_final.csv"))
     insomnia_test = np.array(pd.read_csv("insomnia_test_final.csv"))
@@ -165,7 +198,20 @@ def main():
     insomnia_xTest = insomnia_test[:, :-1]
     insomnia_yTest = insomnia_test[:, -1]
 
-    # run_insomnia_model(insomnia_train, insomnia_test)
+    insomnia_xTrain = np.array(pd.read_csv("binary_insomnia_train_xFeat.csv"))
+    insomnia_yTrain = np.array(pd.read_csv("binary_insomnia_train_y.csv"))
+    insomnia_xTest = np.array(pd.read_csv("binary_insomnia_test_xFeat.csv"))
+    insomnia_yTest = np.array(pd.read_csv("binary_insomnia_test_y.csv"))
+
+    # yPred, _ = run_insomnia_model(insomnia_xTrain, insomnia_xTest, insomnia_yTrain, insomnia_yTest)
+
+    OCD_fpr, OCD_tpr, _ = roc_curve(OCD_yTest, OCD_yPred)
+    OCD_roc_auc = roc_auc_score(OCD_yTest, OCD_yPred)
+
+    df = pd.DataFrame({'FPR': OCD_fpr, 'TPR': OCD_tpr})
+
+    # Write the DataFrame to a CSV file
+    df.to_csv('knn_OCD_graph_data.csv', index=False)
 
 
     anxiety_train = np.array(pd.read_csv("anxiety_train_final.csv"))
@@ -176,7 +222,12 @@ def main():
     anxiety_xTest = anxiety_test[:, :-1]
     anxiety_yTest = anxiety_test[:, -1]
 
-    # run_anxiety_model(anxiety_train, anxiety_test)
+    anxiety_xTrain = np.array(pd.read_csv("binary_anxiety_train_xFeat.csv"))
+    anxiety_yTrain = np.array(pd.read_csv("binary_anxiety_train_y.csv"))
+    anxiety_xTest = np.array(pd.read_csv("binary_anxiety_test_xFeat.csv"))
+    anxiety_yTest = np.array(pd.read_csv("binary_anxiety_test_y.csv"))
+
+    run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTest)
 
     depression_train = np.array(pd.read_csv("depression_train_final.csv"))
     depression_test = np.array(pd.read_csv("depression_test_final.csv"))
@@ -186,9 +237,14 @@ def main():
     depression_xTest = depression_test[:, :-1]
     depression_yTest = depression_test[:, -1]
 
-    # run_depression_model(depression_train, depression_test)
+    depression_xTrain = np.array(pd.read_csv("binary_depression_train_xFeat.csv"))
+    depression_yTrain = np.array(pd.read_csv("binary_depression_train_y.csv"))
+    depression_xTest = np.array(pd.read_csv("binary_depression_test_xFeat.csv"))
+    depression_yTest = np.array(pd.read_csv("binary_depression_test_y.csv"))
 
-    gridSearch(OCD_xTrain, OCD_yTrain, insomnia_xTrain, insomnia_yTrain, anxiety_xTrain, anxiety_yTrain, depression_xTrain, depression_yTrain)
+    run_depression_model(depression_xTrain, depression_xTest, depression_yTrain, depression_yTest)
+
+    # gridSearch(OCD_xTrain, OCD_yTrain, insomnia_xTrain, insomnia_yTrain, anxiety_xTrain, anxiety_yTrain, depression_xTrain, depression_yTrain)
 
 if __name__ == "__main__":
     main()
