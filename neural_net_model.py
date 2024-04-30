@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import KFold, GridSearchCV, RandomizedSearchCV
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error, roc_auc_score, roc_curve
+from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error, roc_auc_score, roc_curve, confusion_matrix
 import numpy as np
 # from knn_model import OCD_fpr, OCD_tpr, OCD_roc_auc
 
@@ -202,6 +202,11 @@ def main():
 
     OCD_yPred, _ = run_OCD_model(OCD_xTrain, OCD_xTest, OCD_yTrain, OCD_yTest)
 
+    matrix = confusion_matrix(OCD_yTest, OCD_yPred)
+
+    print("OCD NN Confusion Matrix:")
+    print(matrix)
+
     OCD_nn_fpr, OCD_nn_tpr, _ = roc_curve(OCD_yTest, OCD_yPred)
     OCD_nn_roc_auc = roc_auc_score(OCD_yTest, OCD_yPred)
 
@@ -234,7 +239,7 @@ def main():
     plt.plot(OCD_nn_fpr, OCD_nn_tpr, color='darkorange', lw=2, label='NN ROC curve (area = %0.2f)' % OCD_nn_roc_auc)
     plt.plot(OCD_knn_fpr, OCD_knn_tpr, color='blue', lw=2, label='KNN ROC curve (area = %0.2f)' % OCD_knn_roc_auc)
     plt.plot(OCD_dt_fpr, OCD_dt_tpr, color='brown', lw=2, label='DT ROC curve (area = %0.2f)' % OCD_dt_roc_auc)
-    plt.plot(OCD_rf_fpr, OCD_rf_tpr, color='brown', lw=2, label='Random Forest ROC curve (area = %0.2f)' % OCD_rf_roc_auc)
+    plt.plot(OCD_rf_fpr, OCD_rf_tpr, color='green', lw=2, label='Random Forest ROC curve (area = %0.2f)' % OCD_rf_roc_auc)
     plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
@@ -264,18 +269,43 @@ def main():
     
 
     insomnia_yPred, _ = run_insomnia_model(insomnia_xTrain, insomnia_xTest, insomnia_yTrain, insomnia_yTest)
+
+    matrix = confusion_matrix(insomnia_yTest, insomnia_yPred)
+
+    print("Insomnia NN Confusion Matrix:")
+    print(matrix)
     
-    fpr, tpr, _ = roc_curve(insomnia_yTest, insomnia_yPred)
-    roc_auc = roc_auc_score(insomnia_yTest, insomnia_yPred)
+    insomnia_nn_fpr, insomnia_nn_tpr, _ = roc_curve(insomnia_yTest, insomnia_yPred)
+    insomnia_nn_roc_auc = roc_auc_score(insomnia_yTest, insomnia_yPred)
+
+    insomnia_knn_roc_auc = 0.5414141414141413
+    insomnia_knn_fpr_tpr = pd.read_csv('knn_insomnia_graph_data.csv')
+    insomnia_knn_fpr = insomnia_knn_fpr_tpr.iloc[:, 0]
+    insomnia_knn_tpr = insomnia_knn_fpr_tpr.iloc[:, 1]
+
+
+    insomnia_dt_roc_auc = 0.46212121212121215
+    insomnia_dt_fpr_tpr = pd.read_csv('dt_insomnia_graph_data.csv')
+    insomnia_dt_fpr = insomnia_dt_fpr_tpr.iloc[:, 0]
+    insomnia_dt_tpr = insomnia_dt_fpr_tpr.iloc[:, 1]
+
+    insomnia_rf_roc_auc = 0.5469696969696969
+    insomnia_rf_fpr_tpr = pd.read_csv('random_forest_insomnia_graph_data.csv')
+    insomnia_rf_fpr = insomnia_rf_fpr_tpr.iloc[:, 0]
+    insomnia_rf_tpr = insomnia_rf_fpr_tpr.iloc[:, 1]
+
 
     plt.figure()
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot(insomnia_nn_fpr, insomnia_nn_tpr, color='darkorange', lw=2, label='NN ROC curve (area = %0.2f)' % insomnia_nn_roc_auc)
+    plt.plot(insomnia_knn_fpr, insomnia_knn_tpr, color='blue', lw=2, label='KNN ROC curve (area = %0.2f)' % insomnia_knn_roc_auc)
+    plt.plot(insomnia_dt_fpr, insomnia_dt_tpr, color='brown', lw=2, label='DT ROC curve (area = %0.2f)' % insomnia_dt_roc_auc)
+    plt.plot(insomnia_rf_fpr, insomnia_rf_tpr, color='green', lw=2, label='Random Forest ROC curve (area = %0.2f)' % insomnia_rf_roc_auc)
     plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic for insomnia NN')
+    plt.title('Receiver Operating Characteristic (ROC) Curves for Insomnia')
     plt.legend(loc="lower right")
     plt.show()
 
@@ -299,13 +329,40 @@ def main():
     anxiety_xTest = np.array(pd.read_csv("binary_anxiety_test_xFeat.csv"))
     anxiety_yTest = np.array(pd.read_csv("binary_anxiety_test_y.csv"))
 
+    
+
     anxiety_yPred, _ = run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTest)
 
-    fpr, tpr, _ = roc_curve(anxiety_yTest, anxiety_yPred)
-    roc_auc = roc_auc_score(anxiety_yTest, anxiety_yPred)
+    matrix = confusion_matrix(anxiety_yTest, anxiety_yPred)
+
+    print("Anxiety NN Confusion Matrix:")
+    print(matrix)
+
+    anxiety_nn_fpr, anxiety_nn_tpr, _ = roc_curve(anxiety_yTest, anxiety_yPred)
+    anxiety_nn_roc_auc = roc_auc_score(anxiety_yTest, anxiety_yPred)
+
+    anxiety_knn_roc_auc = 0.49409849409849405
+    anxiety_knn_fpr_tpr = pd.read_csv('knn_anxiety_graph_data.csv')
+    anxiety_knn_fpr = anxiety_knn_fpr_tpr.iloc[:, 0]
+    anxiety_knn_tpr = anxiety_knn_fpr_tpr.iloc[:, 1]
+
+    anxiety_dt_roc_auc = 0.4919617419617419
+    anxiety_dt_fpr_tpr = pd.read_csv('dt_anxiety_graph_data.csv')
+    anxiety_dt_fpr = anxiety_dt_fpr_tpr.iloc[:, 0]
+    anxiety_dt_tpr = anxiety_dt_fpr_tpr.iloc[:, 1]
+
+    anxiety_rf_roc_auc = 0.4868686868686869
+    anxiety_rf_fpr_tpr = pd.read_csv('random_forest_anxiety_graph_data.csv')
+    anxiety_rf_fpr = anxiety_rf_fpr_tpr.iloc[:, 0]
+    anxiety_rf_tpr = anxiety_rf_fpr_tpr.iloc[:, 1]
+
+
 
     plt.figure()
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot(anxiety_nn_fpr, anxiety_nn_tpr, color='darkorange', lw=2, label='NN ROC curve (area = %0.2f)' % anxiety_nn_roc_auc)
+    plt.plot(anxiety_knn_fpr, anxiety_knn_tpr, color='blue', lw=2, label='KNN ROC curve (area = %0.2f)' % anxiety_knn_roc_auc)
+    plt.plot(anxiety_dt_fpr, anxiety_dt_tpr, color='brown', lw=2, label='DT ROC curve (area = %0.2f)' % anxiety_dt_roc_auc)
+    plt.plot(anxiety_rf_fpr, anxiety_rf_tpr, color='green', lw=2, label='Random Forest ROC curve (area = %0.2f)' % anxiety_rf_roc_auc)
     plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
@@ -335,11 +392,36 @@ def main():
 
     depression_yPred, _ = run_depression_model(depression_xTrain, depression_xTest, depression_yTrain, depression_yTest)
 
-    fpr, tpr, _ = roc_curve(depression_yTest, depression_yPred)
-    roc_auc = roc_auc_score(depression_yTest, depression_yPred)
+    matrix = confusion_matrix(depression_yTest, depression_yPred)
+
+    print("Depression NN Confusion Matrix:")
+    print(matrix)
+
+    depression_nn_fpr, depression_nn_tpr, _ = roc_curve(depression_yTest, depression_yPred)
+    depression_nn_roc_auc = roc_auc_score(depression_yTest, depression_yPred)
+
+    depression_knn_roc_auc = 0.5854660045836516
+    depression_knn_fpr_tpr = pd.read_csv('knn_depression_graph_data.csv')
+    depression_knn_fpr = depression_knn_fpr_tpr.iloc[:, 0]
+    depression_knn_tpr = depression_knn_fpr_tpr.iloc[:, 1]
+
+    depression_dt_roc_auc = 0.5824102368220014
+    depression_dt_fpr_tpr = pd.read_csv('dt_depression_graph_data.csv')
+    depression_dt_fpr = depression_dt_fpr_tpr.iloc[:, 0]
+    depression_dt_tpr = depression_dt_fpr_tpr.iloc[:, 1]
+
+    depression_rf_roc_auc = 0.5824102368220014
+    depression_rf_fpr_tpr = pd.read_csv('random_forest_depression_graph_data.csv')
+    depression_rf_fpr = depression_rf_fpr_tpr.iloc[:, 0]
+    depression_rf_tpr = depression_rf_fpr_tpr.iloc[:, 1]
+
+
 
     plt.figure()
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot(depression_nn_fpr, depression_nn_tpr, color='darkorange', lw=2, label='NN ROC curve (area = %0.2f)' % depression_nn_roc_auc)
+    plt.plot(depression_knn_fpr, depression_knn_tpr, color='blue', lw=2, label='KNN ROC curve (area = %0.2f)' % depression_knn_roc_auc)
+    plt.plot(depression_dt_fpr, depression_dt_tpr, color='brown', lw=2, label='DT ROC curve (area = %0.2f)' % depression_dt_roc_auc)
+    plt.plot(depression_rf_fpr, depression_rf_tpr, color='green', lw=2, label='Random Forest ROC curve (area = %0.2f)' % depression_rf_roc_auc)
     plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])

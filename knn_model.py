@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error, roc_auc_score, roc_curve
+from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error, roc_auc_score, roc_curve, confusion_matrix
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -96,7 +96,7 @@ def run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTe
     print("recall score for anxiety: ", recall_score(anxiety_yTest, anxiety_yPred, average='weighted'))
     print("mean squared error for anxiety: ", mean_squared_error(anxiety_yTest, anxiety_yPred))
 
-    return accuracy_score(anxiety_yTest, anxiety_yPred)
+    return anxiety_yPred, accuracy_score(anxiety_yTest, anxiety_yPred)
 
 ##############################################################
 
@@ -126,7 +126,7 @@ def run_depression_model(depression_xTrain, depression_xTest, depression_yTrain,
     print("recall score for depression: ", recall_score(depression_yTest, depression_yPred, average='weighted'))
     print("mean squared error for depression: ", mean_squared_error(depression_yTest, depression_yPred))
 
-    return accuracy_score(depression_yTest, depression_yPred)
+    return depression_yPred, accuracy_score(depression_yTest, depression_yPred)
 
 #######################################################
 
@@ -289,9 +289,14 @@ def main():
     df = pd.DataFrame({'FPR': OCD_fpr, 'TPR': OCD_tpr})
 
     # Write the DataFrame to a CSV file
-    df.to_csv('knn_OCD_graph_data.csv', index=False)
-    print("knn ocd roc auc: ", OCD_roc_auc)
+    # df.to_csv('knn_OCD_graph_data.csv', index=False)
+    # print("knn ocd roc auc: ", OCD_roc_auc)
     # knn_OCD_graph_data.to_csv('knn_OCD_graph_data.csv')
+
+    matrix = confusion_matrix(OCD_yTest, OCD_yPred)
+
+    print("OCD KNN Confusion Matrix:")
+    print(matrix)
 
 
 
@@ -308,7 +313,22 @@ def main():
     insomnia_xTest = np.array(pd.read_csv("binary_insomnia_test_xFeat.csv"))
     insomnia_yTest = np.array(pd.read_csv("binary_insomnia_test_y.csv"))
 
-    # run_insomnia_model(insomnia_xTrain, insomnia_xTest, insomnia_yTrain, insomnia_yTest, 65, 'distance')
+    insomnia_yPred, _ = run_insomnia_model(insomnia_xTrain, insomnia_xTest, insomnia_yTrain, insomnia_yTest, 65, 'distance')
+
+    insomnia_fpr, insomnia_tpr, _ = roc_curve(insomnia_yTest, insomnia_yPred)
+    insomnia_roc_auc = roc_auc_score(insomnia_yTest, insomnia_yPred)
+
+    df = pd.DataFrame({'FPR': insomnia_fpr, 'TPR': insomnia_tpr})
+
+    # Write the DataFrame to a CSV file
+    # df.to_csv('knn_insomnia_graph_data.csv', index=False)
+    # print("insomnia ocd roc auc: ", insomnia_roc_auc)
+
+    matrix = confusion_matrix(insomnia_yTest, insomnia_yPred)
+
+    print("Insomnia KNN Confusion Matrix:")
+    print(matrix)
+
 
 
     anxiety_train = np.array(pd.read_csv("anxiety_train_final.csv"))
@@ -324,7 +344,21 @@ def main():
     anxiety_xTest = np.array(pd.read_csv("binary_anxiety_test_xFeat.csv"))
     anxiety_yTest = np.array(pd.read_csv("binary_anxiety_test_y.csv"))
 
-    # run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTest, 30, 'uniform')
+    anxiety_yPred, _ = run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTest, 30, 'uniform')
+
+    anxiety_fpr, anxiety_tpr, _ = roc_curve(anxiety_yTest, anxiety_yPred)
+    anxiety_roc_auc = roc_auc_score(anxiety_yTest, anxiety_yPred)
+
+    df = pd.DataFrame({'FPR': anxiety_fpr, 'TPR': anxiety_tpr})
+
+    # Write the DataFrame to a CSV file
+    # df.to_csv('knn_anxiety_graph_data.csv', index=False)
+    # print("anxiety anxiety roc auc: ", anxiety_roc_auc)
+
+    matrix = confusion_matrix(anxiety_yTest, anxiety_yPred)
+
+    print("Anxiety KNN Confusion Matrix:")
+    print(matrix)
     
 
     depression_train = np.array(pd.read_csv("depression_train_final.csv"))
@@ -340,7 +374,21 @@ def main():
     depression_xTest = np.array(pd.read_csv("binary_depression_test_xFeat.csv"))
     depression_yTest = np.array(pd.read_csv("binary_depression_test_y.csv"))
 
-    # run_depression_model(depression_xTrain, depression_xTest, depression_yTrain, depression_yTest, 140, 'distance')
+    depression_yPred, _ = run_depression_model(depression_xTrain, depression_xTest, depression_yTrain, depression_yTest, 140, 'distance')
+
+    depression_fpr, depression_tpr, _ = roc_curve(depression_yTest, depression_yPred)
+    depression_roc_auc = roc_auc_score(depression_yTest, depression_yPred)
+
+    df = pd.DataFrame({'FPR': depression_fpr, 'TPR': depression_tpr})
+
+    matrix = confusion_matrix(depression_yTest, depression_yPred)
+
+    print("Depression KNN Confusion Matrix:")
+    print(matrix)
+
+    # Write the DataFrame to a CSV file
+    # df.to_csv('knn_depression_graph_data.csv', index=False)
+    # print("depression ocd roc auc: ", depression_roc_auc)
 
     # optimal_k_value(OCD_train, OCD_test, insomnia_train, insomnia_test, anxiety_train, anxiety_test, depression_train, depression_test)
 

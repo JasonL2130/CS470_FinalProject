@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
+from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error, confusion_matrix
 import numpy as np
 from sklearn.metrics import roc_curve, roc_auc_score, auc
 import matplotlib.pyplot as plt
@@ -73,7 +73,7 @@ def run_insomnia_model(insomnia_xTrain, insomnia_xTest, insomnia_yTrain, insomni
     print("recall score for insomnia: ", recall_score(insomnia_yTest, insomnia_yPred, average='weighted'))
     print("mean squared error for insomnia: ", mean_squared_error(insomnia_yTest, insomnia_yPred))
 
-    return accuracy_score(insomnia_yTest, insomnia_yPred)
+    return insomnia_yPred, accuracy_score(insomnia_yTest, insomnia_yPred)
 
 ##############################################################
 
@@ -105,7 +105,7 @@ def run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTe
     print("recall score for anxiety: ", recall_score(anxiety_yTest, anxiety_yPred, average='weighted'))
     print("mean squared error for anxiety: ", mean_squared_error(anxiety_yTest, anxiety_yPred))
 
-    return accuracy_score(anxiety_yTest, anxiety_yPred)
+    return anxiety_yPred, accuracy_score(anxiety_yTest, anxiety_yPred)
 
 ##############################################################
 
@@ -138,7 +138,7 @@ def run_depression_model(depression_xTrain, depression_xTest, depression_yTrain,
     print("recall score for depression: ", recall_score(depression_yTest, depression_yPred, average='weighted'))
     print("mean squared error for depression: ", mean_squared_error(depression_yTest, depression_yPred))
 
-    return accuracy_score(depression_yTest, depression_yPred)
+    return depression_yPred, accuracy_score(depression_yTest, depression_yPred)
 
 
 ############################################################
@@ -290,18 +290,8 @@ def main():
     OCD_yTrain = np.array(pd.read_csv("binary_ocd_train_y.csv"))
     OCD_xTest = np.array(pd.read_csv("binary_ocd_test_xFeat.csv"))
     OCD_yTest = np.array(pd.read_csv("binary_ocd_test_y.csv"))
-    insomnia_xTrain = np.array(pd.read_csv("binary_insomnia_train_xFeat.csv"))
-    insomnia_yTrain = np.array(pd.read_csv("binary_insomnia_train_y.csv"))
-    insomnia_xTest = np.array(pd.read_csv("binary_insomnia_test_xFeat.csv"))
-    insomnia_yTest = np.array(pd.read_csv("binary_insomnia_test_y.csv"))
-    anxiety_xTrain = np.array(pd.read_csv("binary_anxiety_train_xFeat.csv"))
-    anxiety_yTrain = np.array(pd.read_csv("binary_anxiety_train_y.csv"))
-    anxiety_xTest = np.array(pd.read_csv("binary_anxiety_test_xFeat.csv"))
-    anxiety_yTest = np.array(pd.read_csv("binary_anxiety_test_y.csv"))
-    depression_xTrain = np.array(pd.read_csv("binary_depression_train_xFeat.csv"))
-    depression_yTrain = np.array(pd.read_csv("binary_depression_train_y.csv"))
-    depression_xTest = np.array(pd.read_csv("binary_depression_test_xFeat.csv"))
-    depression_yTest = np.array(pd.read_csv("binary_depression_test_y.csv"))
+    
+    
 
     OCD_yPred, _ = run_OCD_model(OCD_xTrain, OCD_xTest, OCD_yTrain, OCD_yTest)
 
@@ -311,8 +301,13 @@ def main():
     df = pd.DataFrame({'FPR': OCD_fpr, 'TPR': OCD_tpr})
 
     # Write the DataFrame to a CSV file
-    df.to_csv('random_forest_OCD_graph_data.csv', index=False)
-    print("random forest ocd roc auc: ", OCD_roc_auc)
+    # df.to_csv('random_forest_OCD_graph_data.csv', index=False)
+    # print("random forest ocd roc auc: ", OCD_roc_auc)
+
+    matrix = confusion_matrix(OCD_yTest, OCD_yPred)
+
+    print("OCD Random Forest Confusion Matrix:")
+    print(matrix)
 
     # accuracy score for OCD:  0.47586206896551725
     # precision score for OCD:  0.3205159048382785
@@ -327,7 +322,28 @@ def main():
     insomnia_xTest = insomnia_test[:, :-1]
     insomnia_yTest = insomnia_test[:, -1]
 
-    # run_insomnia_model(insomnia_xTrain, insomnia_xTest, insomnia_yTrain, insomnia_yTest)
+    insomnia_xTrain = np.array(pd.read_csv("binary_insomnia_train_xFeat.csv"))
+    insomnia_yTrain = np.array(pd.read_csv("binary_insomnia_train_y.csv"))
+    insomnia_xTest = np.array(pd.read_csv("binary_insomnia_test_xFeat.csv"))
+    insomnia_yTest = np.array(pd.read_csv("binary_insomnia_test_y.csv"))
+
+    insomnia_yPred, _ = run_insomnia_model(insomnia_xTrain, insomnia_xTest, insomnia_yTrain, insomnia_yTest)
+
+    insomnia_fpr, insomnia_tpr, _ = roc_curve(insomnia_yTest, insomnia_yPred)
+    insomnia_roc_auc = roc_auc_score(insomnia_yTest, insomnia_yPred)
+
+    df = pd.DataFrame({'FPR': insomnia_fpr, 'TPR': insomnia_tpr})
+
+    # Write the DataFrame to a CSV file
+    # df.to_csv('random_forest_insomnia_graph_data.csv', index=False)
+    # print("random forest insomnia roc auc: ", insomnia_roc_auc)
+
+    matrix = confusion_matrix(insomnia_yTest, insomnia_yPred)
+
+    print("Insomnia Random Forest Confusion Matrix:")
+    print(matrix)
+
+
 
     # accuracy score for insomnia:  0.23448275862068965
     # precision score for insomnia:  0.20484100207215344
@@ -342,7 +358,26 @@ def main():
     anxiety_xTest = anxiety_test[:, :-1]
     anxiety_yTest = anxiety_test[:, -1]
 
-    # run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTest)
+    anxiety_xTrain = np.array(pd.read_csv("binary_anxiety_train_xFeat.csv"))
+    anxiety_yTrain = np.array(pd.read_csv("binary_anxiety_train_y.csv"))
+    anxiety_xTest = np.array(pd.read_csv("binary_anxiety_test_xFeat.csv"))
+    anxiety_yTest = np.array(pd.read_csv("binary_anxiety_test_y.csv"))
+
+    anxiety_yPred, _ = run_anxiety_model(anxiety_xTrain, anxiety_xTest, anxiety_yTrain, anxiety_yTest)
+
+    anxiety_fpr, anxiety_tpr, _ = roc_curve(anxiety_yTest, anxiety_yPred)
+    anxiety_roc_auc = roc_auc_score(insomnia_yTest, anxiety_yPred)
+
+    df = pd.DataFrame({'FPR': anxiety_fpr, 'TPR': anxiety_tpr})
+
+    # Write the DataFrame to a CSV file
+    # df.to_csv('random_forest_anxiety_graph_data.csv', index=False)
+    # print("random forest anxiety roc auc: ", anxiety_roc_auc)
+
+    matrix = confusion_matrix(anxiety_yTest, anxiety_yPred)
+
+    print("Anxiety Random Forest Confusion Matrix:")
+    print(matrix)
 
     # accuracy score for anxiety:  0.33793103448275863
     # precision score for anxiety:  0.30454859948666446
@@ -357,7 +392,26 @@ def main():
     depression_xTest = depression_test[:, :-1]
     depression_yTest = depression_test[:, -1]
 
-    # run_depression_model(depression_xTrain, depression_xTest, depression_yTrain, depression_yTest)
+    depression_xTrain = np.array(pd.read_csv("binary_depression_train_xFeat.csv"))
+    depression_yTrain = np.array(pd.read_csv("binary_depression_train_y.csv"))
+    depression_xTest = np.array(pd.read_csv("binary_depression_test_xFeat.csv"))
+    depression_yTest = np.array(pd.read_csv("binary_depression_test_y.csv"))
+
+    depression_yPred, _ = run_depression_model(depression_xTrain, depression_xTest, depression_yTrain, depression_yTest)
+
+    depression_fpr, depression_tpr, _ = roc_curve(depression_yTest, depression_yPred)
+    depression_roc_auc = roc_auc_score(depression_yTest, depression_yPred)
+
+    df = pd.DataFrame({'FPR': depression_fpr, 'TPR': depression_tpr})
+
+    # Write the DataFrame to a CSV file
+    # df.to_csv('random_forest_depression_graph_data.csv', index=False)
+    # print("random forest depression roc auc: ", depression_roc_auc)
+
+    matrix = confusion_matrix(depression_yTest, depression_yPred)
+
+    print("Depression Random Forest Confusion Matrix:")
+    print(matrix)
 
     # accuracy score for depression:  0.31724137931034485
     # precision score for depression:  0.45913369227850104
